@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<!-- saved from url=(0039)http://localhost:8080/animator/v/0.3.2/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <title>animator-editor dev0.3.3</title>
+    <link rel="icon" type="image/png" href="favicon.ico">
+    <link rel="stylesheet" href="css/bootbox-dialoges.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    <link rel="stylesheet" href="css/side-panels.css">
+    <link rel="stylesheet" href="css/messg.css">
+    <link rel="stylesheet" href="css/spectrum.css">
+    <link rel="stylesheet" href="css/colorpicker.css">
+    <link rel="stylesheet" href="css/spinner.css">
+    <link rel="stylesheet" href="css/jquery-ui.css">
+    <link rel="stylesheet" href="css/alerts.css">
+    <link rel="stylesheet" href="css/panel-ui.css">
+    <link rel="stylesheet" href="css/anywhere3d.css">
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery-ui.js"></script>
+    <script>var debugMode = true;</script>
+
+</head>
+
+
+<body>
+
+<style>
+/*  animator.css  */
+    body { margin:0px; height:100vh; overflow:hidden; font-family: Arial, sans-serif; }
+    canvas { display:block !important; cursor:move; -ms-touch-action:none; touch-action:none; }
+    #body-section { 
+        height:100%; padding-top:0px; padding-bottom:0px; 
+        background-color:rgba(0,0,0,1); overflow:hidden; 
+    }
+    #render-container { height:100%; opacity:1; background-color:rgb(0,0,0); }
+</style>
+
+
+<style>
+/*animator-sidepanels.css*/
+    h1, h2, h3, h4, h5, h6, label, 
+    #left-side, #left-side-content,
+    #right-side, #right-side-content,
+    .btn, .btn-primary, .btn-success,
+    .btn-info, .btn-default,
+    .btn-warning, .btn-danger,
+    .form-group, .form-control {
+        letter-spacing: 0px;
+        font-family:Arial, sans-serif;
+    }
+    .row { margin-left:-0.9375rem; margin-right:0rem; }
+    hr { height:0px; margin-top:1rem; border-top:1px solid #ffffff;}
+    .form-control { min-height:2em; }
+    .btn-primary, .btn-success, .btn-default, .btn-info, 
+    .btn-warning, .btn-danger, .btn-white { 
+        padding:0.5rem 1rem; font-size:0.875rem; border-radius:4px; cursor:pointer; 
+    }
+    .btn-white-outline { background:none; border:solid 1px white; }
+    .btn-success { background-color:#006900; border-color:#006900; }
+    .btn-success:hover { background-color:#009900; }
+    .detach { 
+        display:inline-block; height:10px; width:10px; vertical-align:middle;
+        background:url("img/detach-close-icon.png") 50% 50% / contain no-repeat rgba(255, 255, 255, 0); 
+    }
+    #pin-tip  { position:absolute; max-width:180; max-height:20px; top:5px; left:-170px; text-align:left; overflow:hidden;  z-index:1000;}
+    #left-side-content, #right-side-content { top:20px; bottom:20px; overflow-y:auto; }
+    .nav-btn + .nav-btn { padding-left: 1rem; }
+    .scroll-control-left {left:5px;}
+    .scroll-control-right {right:30px;}
+    .scroll-control-left, .scroll-control-right {
+        position: absolute; width: 30px; height: 30px; text-align: center; background: #4E443C; color: #fff; text-decoration: none;
+        text-shadow: 0 0 1px #000; font: 24px/27px Arial, sans-serif; -webkit-border-radius: 30px; -moz-border-radius: 30px; border-radius: 30px;
+        -webkit-box-shadow: 0 0 4px #F0EFE7; -moz-box-shadow: 0 0 4px #F0EFE7; box-shadow: 0 0 4px #F0EFE7;
+    }
+    .scroll-right{ -webkit-transform: translateX(+100); -webkit-transition: opacity 250ms ease-out;}
+    .scroll-left{ -webkit-transform: translateX(-100); -webkit-transition: opacity 250ms ease-out;}
+</style>
+
+
+<style>
+/*animator-components.css*/
+    .control-container { 
+        left:0px; right:0px; margin-bottom:1px; padding:10px; 
+        color: #ffffff; border:1px solid #ffffff; border-radius:9px; 
+    }
+    .slider-row { padding-left:10px; padding-right:5px; }
+    .dynamic-label  { position:absolute; width:18%; font-size:11px; padding-top:5px; }
+    .dynamic-slider { width:60%; margin-left:22%; }
+    .dynamic-output { 
+        position:absolute; margin-right:10px; width:18%; right:15px;
+        color:#ffffff; border:none; background-color:rgba(255,255,255,0); 
+        font-weight:bold; font-size:1em; text-align:right; font-family:Arial;
+    } 
+    .reset-container { 
+        padding:1px; margin-bottom:5px; font-weight:normal; 
+        font-size:0.8em; text-align:left; margin-top:5px; 
+    }
+    .reset-container a { cursor:pointer; }
+    #hover { opacity:0.5; }
+    .reset-container a span { color:gray !important; }
+	.reset-container a:link {color:#ccf !important; text-decoration:initial;}
+    .reset-container a:visited span {color:#ccf !important; text-decoration:initial;}
+    .reset-container a:hover span  {color:#0f0 !important; text-decoration:initial;}
+    .reset-container a:active span {color:#f00 !important; text-decoration:initial;}
+    .expo-buttons-row { display:inline-flex; margin-bottom:30px; width:100%; }
+    .btn-holder { text-align:center; }
+    .btn-holder + .btn-holder { margin-left:5px; }
+    .btn-white { color:#fff; }
+    #load-skinned-button, #load-pose-button, #load-data-button, #load-bvh-button { width:49%; }
+    #export-data, #export-pose { width:49%; margin-left:0px; }
+    #exports-holder { margin-bottom:30px; }
+    #crazy-pose { width:100%; margin-left:0px; }
+    #load-skinned-button:hover, #load-pose-button:hover, #load-data-button:hover, #load-bvh-button:hover,
+    #export-data:hover, #export-pose:hover, #crazy-pose:hover { color:#0275d8 !important; }
+    #animation-loop, #hidden-helpers, #manual-play { float:right; }    
+</style>
+
+<section class="mbr-section mbr-after-navbar" id="body-section">
+
+    <!-- SCENE -->
+
+    <div id="render-container" class="mbr-overlay"></div>
+
+    <!-- LEFT PANEL -->
+
+    <div id="left-side">
+        <div id="left-side-pinbtn" title="click this to pin/unpin panel"></div>
+
+        <div id="left-side-content">
+            <div id="avatar-editor-left-panel">
+
+                <div id="imports-holder">
+                    <div class="slider-row" style="font-size:1.3em; margin-bottom:15px;">Import:</div>
+                    <div class="expo-buttons-row">
+                        <div class="btn-holder" id="import-bvh-holder">
+                            <a id="import-bvh-button" class="btn btn-white btn-white-outline">Import BVH</a>
+                            <input type="file" id="load-bvh-input" style="display:none;">
+
+</div>
+
+<div class="btn-holder" id="import-skinned-holder">
+<a id="import-skinned-button" class="btn btn-white btn-white-outline">Import Skinned</a>
+<input type="file" id="read-skinned" style="display:none;">
+</div>
+</div>
+
+<div class="expo-buttons-row">
+    <div class="btn-holder" id="import-pose-holder">
+        <a id="import-pose-button" class="btn btn-white btn-white-outline">Import Pose</a>
+        <input type="file" id="read-pose" style="display:none;">
+
+
+</div>
+
+<div class="btn-holder" id="import-anim-holder">
+<a id="import-animation-button" class="btn btn-white btn-white-outline">Import Animation</a>
+<input type="file" id="read-animation" style="display:none;">
+</div>
+</div>
+</div>
+
+<div id="exports-holder">
+    <div class="slider-row" style="font-size:1.3em; margin-top:15px; margin-bottom:15px;">Export:</div>
+    <div class="expo-buttons-row">
+        <div class="btn-holder" id="export-pose-holder">
+            <a id="export-pose-data" class="btn btn-white btn-white-outline">Export Pose</a>
+</div>
+
+<div class="btn-holder" id="export-anim-holder">
+<a id="export-animation-data" class="btn btn-white btn-white-outline">Export Data</a>
+</div>
+</div>
+</div>
+
+<div id="options-holder">
+    <div class="slider-row" style="font-size:1.3em; margin-top:15px; margin-bottom:15px;">Play Options:
+        <div class="slider-row" style="font-size:0.75em; margin-top:1em; margin-bottom:1em;">Loop:
+            <input type="checkbox" id="animation-loop" name="loop" checked="true" title="loop">
+        </div>
+        <div class="slider-row" style="font-size:0.75em; margin-bottom:1em;">Manual autoplay:
+            <input type="checkbox" id="manual-play" name="manualplay" checked="" title="If checked, animation autoplay at mouse buttons pressed down.">
+        </div>
+        <div class="slider-row" style="font-size:0.75em; margin-bottom:1em;">Hidden helpers:
+            <input type="checkbox" id="hidden-helpers" name="hiddenhelpers" checked="" title="If checked, ground helpers are not visible at play time.">
+        </div>
+    </div>
+</div>
+
+</div>
+</div>
+</div>
+
+    <!-- RIGHT PANEL -->
+
+<div id="right-side">
+<div id="right-side-pinbtn" title="click this to pin/unpin panel"></div>
+
+<div id="right-side-content">
+
+<div id="outfit-editor-right-panel">
+
+<div id="bones-holder">
+<style>
+    #select-bones { position:absolute; left:150px; width:150px; font-size:15px; color:#000000; }
+    #bone-label { position:absolute; left:0px; right:0px; top:0px; font-size:1.3em; text-align:center; }
+    #bone-label-slider { font-size:1em; margin-bottom:15px; }
+    #current-bone-select { padding-bottom:13px; } 
+    #bone-divider { margin-bottom:15px; }
+</style>
+
+<div id="bone-label-slider" class="slider-row">
+    <div id="bone-label">Bone:&nbsp;<span id="bone-label-selected-name">Hips</span></div>
+</div>
+
+<div id="current-bone-select" class="control-container">
+    <label for="select-bones" id="select-label">Selected Bone:</label>
+    <select id="select-bones" name="BONES" size="1"><option value="Hips">Hips</option><option value="LHipJoint">LHipJoint</option><option value="LeftUpLeg">LeftUpLeg</option><option value="LeftLeg">LeftLeg</option><option value="LeftFoot">LeftFoot</option><option value="LeftToeBase">LeftToeBase</option><option value="RHipJoint">RHipJoint</option><option value="RightUpLeg">RightUpLeg</option><option value="RightLeg">RightLeg</option><option value="RightFoot">RightFoot</option><option value="RightToeBase">RightToeBase</option><option value="LowerBack">LowerBack</option><option value="Spine">Spine</option><option value="Spine1">Spine1</option><option value="Neck">Neck</option><option value="Neck1">Neck1</option><option value="Head">Head</option><option value="LeftShoulder">LeftShoulder</option><option value="LeftArm">LeftArm</option><option value="LeftForeArm">LeftForeArm</option><option value="LeftHand">LeftHand</option><option value="LeftFingerBase">LeftFingerBase</option><option value="LeftHandIndex1">LeftHandIndex1</option><option value="LThumb">LThumb</option><option value="RightShoulder">RightShoulder</option><option value="RightArm">RightArm</option><option value="RightForeArm">RightForeArm</option><option value="RightHand">RightHand</option><option value="RightFingerBase">RightFingerBase</option><option value="RightHandIndex1">RightHandIndex1</option><option value="RThumb">RThumb</option></select>
+</div>
+
+<div id="bone-divider" class="reset-container"></div>
+</div>
+
+<div id="position-holder">
+<div id="position-sliders" class="control-container">
+    <div class="slider-row">
+        <label for="slider-pos-x" id="label-pos-x" class="dynamic-label">position&nbsp;<strong>x:</strong></label>
+        <input type="range" id="slider-pos-x" class="dynamic-slider" min="-1" max="1" value="0" step="0.01">
+        <input type="number" id="output-pos-x" class="dynamic-output position-output" value="0" step="0.1">
+    </div>
+    <div class="slider-row">
+        <label for="slider-pos-y" id="label-pos-y" class="dynamic-label">position&nbsp;<strong>y:</strong></label>
+        <input type="range" id="slider-pos-y" class="dynamic-slider" min="-1" max="1" value="0" step="0.01">
+        <input type="number" id="output-pos-y" class="dynamic-output position-output" value="0" step="0.1">
+    </div>
+    <div class="slider-row">
+        <label for="slider-pos-z" id="label-pos-z" class="dynamic-label">position&nbsp;<strong>z:</strong></label>
+        <input type="range" id="slider-pos-z" class="dynamic-slider" min="-1" max="1" value="0" step="0.01">
+        <input type="number" id="output-pos-z" class="dynamic-output position-output" value="0" step="0.1">
+    </div>
+</div>
+
+<li class="reset-container">
+    <a><span id="reset-position">Reset bones position</span></a>
+</li>
+</div>
+
+<div id="rotation-holder">
+<div id="rotation-sliders" class="control-container">
+    <div class="slider-row">
+        <label for="slider-rot-x" id="label-rot-x" class="dynamic-label">rotation&nbsp;<strong>x:</strong></label>
+        <input type="range" id="slider-rot-x" class="dynamic-slider" min="-180" max="180" value="0" step="1">
+        <input type="number" id="output-rot-x" class="dynamic-output rotation-output" min="-180" max="180" value="0" step="1">
+    </div>
+    <div class="slider-row">
+        <label for="slider-rot-y" id="label-rot-y" class="dynamic-label">rotation&nbsp;<strong>y:</strong></label>
+        <input type="range" id="slider-rot-y" class="dynamic-slider" min="-180" max="180" value="0" step="1">
+        <input type="number" id="output-rot-y" class="dynamic-output rotation-output" min="-180" max="180" value="0" step="1">
+    </div>
+    <div class="slider-row">
+        <label for="slider-rot-z" id="label-rot-z" class="dynamic-label">rotation&nbsp;<strong>z:</strong></label>
+        <input type="range" id="slider-rot-z" class="dynamic-slider" min="-180" max="180" value="0" step="1">
+        <input type="number" id="output-rot-z" class="dynamic-output rotation-output" min="-180" max="180" value="0" step="1">
+    </div>
+</div>
+
+<li class="reset-container">
+    <a><span id="reset-rotation">Reset bones rotation</span></a>
+</li>
+</div>
+
+<div id="scale-holder">
+<style>
+    span.push-right  { position:absolute; right:20px; }    
+    #keep-ratio     { vertical-align:middle; }
+</style>
+
+<div class="control-container">
+    <div class="slider-row">
+        <label for="slider-scale-uniform" class="dynamic-label">Scale <strong>xyz</strong></label>
+        <input type="range" id="slider-scale-uniform" class="dynamic-slider" min="0.99" max="1.01" value="1" step="0.001">
+        <input type="number" id="output-scale-uniform" class="dynamic-output uniform-scale-output" value="0" step="0.1">
+    </div>
+</div>
+
+<li class="reset-container">
+    <a><span id="reset-scale">Reset bones scale</span></a>
+    <span id="scale-ratio" class="push-right">
+        Keep&nbsp;scale&nbsp;ratio&nbsp;<input type="checkbox" id="keep-ratio" title="keep scale ratio">
+    </span>
+</li>
+
+<div id="scale-sliders" class="control-container">
+    <div class="slider-row">
+        <label for="slider-scl-x" id="label-scl-x" class="dynamic-label">scale&nbsp;<strong>x:</strong></label>
+        <input type="range" id="slider-scl-x" class="dynamic-slider" min="0.99" max="1.01" value="1" step="0.001">
+        <input type="number" id="output-scl-x" class="dynamic-output scale-output" value="1" step="0.1">
+    </div>
+    <div class="slider-row">
+        <label for="slider-scl-y" id="label-scl-y" class="dynamic-label">scale&nbsp;<strong>y:</strong></label>
+        <input type="range" id="slider-scl-y" class="dynamic-slider" min="0.99" max="1.01" value="1" step="0.001">
+        <input type="number" id="output-scl-y" class="dynamic-output scale-output" value="1" step="0.1">
+    </div>
+    <div class="slider-row">
+        <label for="slider-scl-z" id="label-scl-z" class="dynamic-label">scale&nbsp;<strong>z:</strong></label>
+        <input type="range" id="slider-scl-z" class="dynamic-slider" min="0.99" max="1.01" value="1" step="0.001">
+        <input type="number" id="output-scl-z" class="dynamic-output scale-output" value="1" step="0.1">
+    </div>
+</div>
+
+<div class="reset-container"></div>
+</div>
+
+<div id="settings-holder">
+<style>
+    #animation-name { margin-left:22%; font-family:Arial, sans-serif; font-size:12px; width:75%; color:black;}
+</style>
+<div id="animation-options" class="control-container">
+    <div class="slider-row">
+        <label for="slider-dur" class="dynamic-label">Duration&nbsp;<strong>:</strong></label>
+        <input type="range" id="slider-dur" class="dynamic-slider" min="-0.1" max="0.1" value="0" step="0.01">
+        <input type="number" id="output-dur" value="3" class="dynamic-output" min="1" max="10" step="0.1">
+    </div>
+    <div class="slider-row">
+        <label for="scl-time-slider" class="dynamic-label">Speed</label>
+        <input type="range" id="slider-timescale" class="dynamic-slider" min="0" max="2" value="0" step="0.1">
+        <input type="number" id="output-timescale" value="0" class="dynamic-output" step="0.1">
+    </div>
+    <div class="slider-row">
+        <label for="slider-fps" class="dynamic-label">Fps</label>
+        <input type="range" id="slider-fps" class="dynamic-slider" min="0" max="60" value="25" step="1">
+        <input type="number" id="output-fps" value="25" class="dynamic-output" step="1">
+    </div>
+    <div class="slider-row">
+        <label for="animation-name" class="dynamic-label">Name:<strong></strong></label>
+        <input type="text" id="animation-name" maxlength="128" placeholder="animation name">
+    </div>
+</div>
+
+<style>
+    .helper { width:33%; padding-right:10px; }
+</style>
+<div class="reset-container">
+    <li><a class="helper"><span id="avatar-helper">Hide Avatar</span></a></li>
+    <li><a class="helper"><span id="bones-helper">Show Bones</span></a></li>
+    <li><a class="helper"><span id="reset-pose">Rest Pose</span></a></li>
+    <li><a class="helper"><span id="remove-keys">Remove Keymarks</span></a></li>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</section>
+
+<footer class="mbr-small-footer mbr-section mbr-section-nopadding" id="timeliner-footer">
+    <div id="animator-container"><style>
+    #timeliner-footer { background-color: rgb(27,27,27); padding-top:0px; padding-bottom:80px; }
+    #animator-container {
+        position:absolute; bottom:5px; left:10px; right:10px; height:50px; display:block;
+        border:1px solid #ffffff;  border-radius:4px; color:#fff; text-align:left; 
+    }
+    #label-timer        { position:absolute; left:10px; bottom:10px; font-size:1.5em; margin-bottom:0px;}
+    #output-timer       { position:absolute; left:65px; bottom:10px; font-size:1.5em; }
+    #status-msgr        { position:absolute; left:10px; top:-25px; color:#fff; font-size:0.7em; display:none; }
+    #animation-buttons  { position:absolute; top:15px; left:120px; }
+    #animation-remove   { position:absolute; top:5px; right:4px; }
+    #timer-container    { position:absolute; left:320px; right:120px; bottom:13px; border:0px solid #ffffff; }
+    #time-container,
+    #keys-container     { position:absolute; left:320px; right:120px; top:-60px; height:50px; border:0px solid #ffff00; z-index:1000; }
+    #slider-timer       { width:100%; }
+    .key-exist          { color:#090; }
+</style>
+
+<label for="slider-timer" id="label-timer">time:</label>
+<div id="timer-container">
+    <input type="range" min="0" max="3" value="0" class="timerslider" id="slider-timer" step="0.01"> 
+</div>
+<div id="time-container" tabindex="-1"><canvas width="596" height="50"></canvas></div>
+<div id="keys-container" tabindex="-1"></div>
+<strong><output for="slider-timer" class="timeroutput key-exist" id="output-timer">0</output></strong>
+<div id="animation-buttons">
+    <a id="animation-play" class="btn btn-white btn-white-outline">Play</a> 
+    <a id="animation-add" class="btn btn-white btn-white-outline">Add Key</a> 
+</div>
+<a id="animation-remove" class="btn btn-white btn-white-outline">Delete Key</a> 
+<div id="status-msgr">Status messager</div>
+</div>
+</footer>
+
+<script src="js/bootstrap.min.js"></script>
+<script src="js/bootbox.min.js"></script>
+<script src="js/DeviceDetector.js"></script>
+<script src="js/three.min.js"></script>
+<script src="js/EditorControls.js"></script>
+<script src="js/FirstPersonControls.js"></script>
+<script src="js/Detector.js"></script>
+<script src="js/Projector.js"></script>
+<script src="js/Animation.js"></script>
+<script src="js/AnimationHandler.js"></script>
+<script src="js/KeyFrameAnimation.js"></script>
+<script src="js/BVHImport.js"></script>
+<script src="js/animatorController.js"></script>
+<script src="app.js"></script>
+
+</body></html>
